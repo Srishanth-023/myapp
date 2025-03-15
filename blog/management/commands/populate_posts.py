@@ -6,8 +6,10 @@ class Command(BaseCommand):
     help = "This is to insert data"
 
     def handle(self, *args : Any, **options : Any):
-            
-            titles = [
+        # Delete existing data
+        Post.objects.all().delete()
+
+        titles = [
                 "The Future of AI",
                 "Climate Change Solutions",
                 "Remote Work Trends",
@@ -30,7 +32,7 @@ class Command(BaseCommand):
                 "Art and Technology Fusion",
             ]
 
-            contents = [
+        contents = [
                 "Exploring the future of artificial intelligence and its impact on society. AI is poised to revolutionize various industries, from healthcare to finance, with its ability to analyze vast amounts of data and make predictions.",
                 "Discovering solutions to combat climate change and protect the environment. Through innovative technologies and sustainable practices, we can mitigate the effects of global warming and preserve our planet for future generations.",
                 "Analyzing trends and challenges in remote work environments. The shift to remote work has reshaped the way we work and collaborate, presenting both opportunities and challenges for organizations and employees.",
@@ -53,7 +55,7 @@ class Command(BaseCommand):
                 "Exploring the intersection of art, design, and technology in the digital age. The convergence of art, design, and technology has led to innovative creations and experiences, blurring the boundaries between physical and digital worlds.",
             ]
 
-            img_urls = [
+        img_urls = [
                 "https://picsum.photos/id/1/800/400",
                 "https://picsum.photos/id/2/800/400",
                 "https://picsum.photos/id/3/800/400",
@@ -76,8 +78,8 @@ class Command(BaseCommand):
                 "https://picsum.photos/id/20/800/400",
             ]
 
-            for title, content, img_url in zip(titles, contents, img_urls):
-                Post.objects.create(title = title, content = content, img_url = img_url)
+        for title, content, img_url in zip(titles, contents, img_urls):
+            Post.objects.create(title = title, content = content, img_url = img_url)
 
-            self.stdout.write(self.style.SUCCESS("Successfully inserted data !"))
+        self.stdout.write(self.style.SUCCESS("Successfully inserted data !"))
         

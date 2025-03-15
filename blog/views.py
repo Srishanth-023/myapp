@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.urls import reverse
 import logging
 from .models import Post
@@ -21,13 +21,15 @@ def index(request):
     posts = Post.objects.all()
     return render(request, "blog/index.html", {'blog_title' : blog_title, 'posts' : posts})
 
-def detail(request, post_id):
+def detail(request, slug):
     # Getting data from hard coded list 
     # post = next((item for item in posts if item['id'] == int(post_id)), None)
+    try:
+        # Getting data from Post model using post_id
+        post = Post.objects.get(slug = slug)
 
-    # Getting data from Post model using post_id
-    post = Post.objects.get(pk = post_id)
-
+    except Post.DoesNotExist:
+        raise Http404("Post does not exist !")
     # logger = logging.getLogger("TESTING")
     # logger.debug(f"Post variable is {post}")
 
