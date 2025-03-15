@@ -8,4 +8,5 @@ urlpatterns = [
     # path("post/<str:post_id>", views.detail, name = "detail"),
     path("new_changed_url", views.new_url_view, name = "new_url"),
     path("old_url", views.old_url_redirect, name = "old_url"),
+    path("contact", views.contact_view, name = "contact"),
 ]
