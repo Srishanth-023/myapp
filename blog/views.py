@@ -35,6 +35,7 @@ def detail(request, slug):
 
     return render(request, "blog/detail.html", {'post' : post})
 
+
 def old_url_redirect(request):
     return redirect(reverse("blog:new_url"))
 
