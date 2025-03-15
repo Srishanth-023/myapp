@@ -54,9 +54,18 @@ def new_url_view(request):
 def contact_view(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
+        logger = logging.getLogger("TESTING")
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
 
         if form.is_valid():
-            logger = logging.getLogger("TESTING")
-            logger.debug(f"Post Data is {form.cleaned_data['name']} - {form.cleaned_data['email']} - {form.cleaned_data['message']}")        
+            logger.debug(f"Post Data is {form.cleaned_data['name']} - {form.cleaned_data['email']} - {form.cleaned_data['message']}")
+            success_message = 'Your details has been recorded !'
+            return render(request, "blog/contact.html", {'form' : form, 'success_message' : success_message})
+        else:
+            logger.debug("Form is not filled properly !")        
 
+        return render(request, "blog/contact.html", {'form' : form, 'name' : name, 'email' : email, 'message' : message})
+    
     return render(request, "blog/contact.html")
