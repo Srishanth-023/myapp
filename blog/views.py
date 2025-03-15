@@ -3,6 +3,7 @@ from django.http import HttpResponse, Http404
 from django.urls import reverse
 import logging
 from .models import Post
+from django.core.paginator import Paginator
 
 # Create your views here.
 
@@ -18,8 +19,14 @@ def index(request):
     blog_title = "Latest Posts"
 
     # Getting data from Post model
-    posts = Post.objects.all()
-    return render(request, "blog/index.html", {'blog_title' : blog_title, 'posts' : posts})
+    all_posts = Post.objects.all()
+
+    # Pagination
+    paginator = Paginator(all_posts, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "blog/index.html", {'blog_title' : blog_title, 'page_obj' : page_obj})
 
 def detail(request, slug):
     # Getting data from hard coded list 
