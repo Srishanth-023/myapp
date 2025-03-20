@@ -71,5 +71,9 @@ def contact_view(request):
     return render(request, "blog/contact.html")
 
 def about_view(request):
-    about_content = AboutUs.objects.first().content
+    about_content = AboutUs.objects.first()
+    if about_content is None or not about_content.content:
+        about_content = "Default content goes here... ❗"
+    else:
+        about_content = about_content.content
     return render(request, "blog/about.html", {'about_content' : about_content})
