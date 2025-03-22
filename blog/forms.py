@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 
 # Contact Form
 class ContactForm(forms.Form):
@@ -25,3 +26,18 @@ class RegisterForm(forms.ModelForm):
 
         if password and password_confirm and password != password_confirm:
             raise forms.ValidationError("Password and Confirm password does not match !")
+
+# Login Form
+class LoginForm(forms.Form):
+    username = forms.CharField(label = "Username", max_length = 100, required = True)
+    password = forms.CharField(label = "Passowrd", max_length = 100, required = True)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        username = cleaned_data.get("username")
+        password = cleaned_data.get("password")
+
+        if username and password:
+            user = authenticate(username=username, password=password)
+            if user is None:
+                raise forms.ValidationError("Invalid Username and Password❗")
