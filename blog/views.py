@@ -4,12 +4,12 @@ from django.urls import reverse
 import logging
 from .models import Post, AboutUs
 from django.core.paginator import Paginator
-from .forms import ContactForm, LoginForm, RegisterForm, ForgotPasswordForm
+from .forms import ContactForm, LoginForm, RegisterForm, ForgotPasswordForm, ResetPasswordForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.models import User
-from django.utils.http import urlsafe_base64_encode
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding  import force_bytes
 from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
@@ -148,5 +148,24 @@ def forgot_password(request):
 
     return render(request, "blog/forgot_password.html", {'form' : form})
 
-def reset_password(request):
-    pass
+def reset_password(request, uidb64, token):
+    if request.method == 'POST':
+        form = ResetPasswordForm(request.POST)
+        if form.is_valid():
+            new_password = form.cleaned_data['new_password']
+            try:
+                uid = urlsafe_base64_decode(uidb64)
+                user = User.objects.get(pk = uid)
+            except (TypeError, ValueError, User.DoesNotExist, OverflowError):
+                user = None
+
+            if user is not None and default_token_generator.check_token(user, token):
+                user.set_password(new_password)
+                user.save()
+                messages.success(request, 'Your password has been successfully reset 👍')
+                return redirect('blog:login')
+            else:
+                messages.error(request, 'The password reset link is invalid 😶‍🌫️')
+
+    return render(request, "blog/reset_password.html")
+    
