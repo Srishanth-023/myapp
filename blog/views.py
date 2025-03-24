@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, Http404
 from django.urls import reverse
 import logging
-from .models import Post, AboutUs
+from .models import Category, Post, AboutUs
 from django.core.paginator import Paginator
 from .forms import ContactForm, LoginForm, RegisterForm, ForgotPasswordForm, ResetPasswordForm
 from django.contrib import messages
@@ -117,7 +117,15 @@ def user_login(request):
 
 def dashboard(request):
     blog_title = "My Posts"
-    return render(request, "blog/dashboard.html", {'blog_title' : blog_title})
+    # Getting data from Post model
+    all_posts = Post.objects.filter(user = request.user)
+
+    # Pagination
+    paginator = Paginator(all_posts, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "blog/dashboard.html", {'blog_title' : blog_title, 'page_obj' : page_obj})
 
 def user_logout(request):
     auth_logout(request)
@@ -168,4 +176,8 @@ def reset_password(request, uidb64, token):
                 messages.error(request, 'The password reset link is invalid 😶‍🌫️')
 
     return render(request, "blog/reset_password.html")
+
+def new_post(request):
+    categories = Category.objects.all()
+    return render(request, "blog/new_post.html", {'categories' : categories})
     
