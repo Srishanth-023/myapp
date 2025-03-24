@@ -4,9 +4,17 @@ from django.urls import reverse
 import logging
 from .models import Post, AboutUs
 from django.core.paginator import Paginator
-from .forms import ContactForm, LoginForm, RegisterForm
+from .forms import ContactForm, LoginForm, RegisterForm, ForgotPasswordForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.models import User
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding  import force_bytes
+from django.template.loader import render_to_string
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import send_mail
+
 
 # Create your views here.
 
@@ -93,7 +101,7 @@ def register(request):
             return redirect("blog:login")
     return render(request, "blog/register.html", {'form' : form})
 
-def login(request):
+def user_login(request):
     form = LoginForm()
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -111,6 +119,34 @@ def dashboard(request):
     blog_title = "My Posts"
     return render(request, "blog/dashboard.html", {'blog_title' : blog_title})
 
-def logout(request):
+def user_logout(request):
     auth_logout(request)
     return redirect("blog:index")
+
+def forgot_password(request):
+    form = ForgotPasswordForm()
+    if request.method == 'POST':
+        # Form
+        form = ForgotPasswordForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            user = User.objects.get(email = email)
+            # Sending Email to reset PASSWORD
+            token = default_token_generator.make_token(user) # Valid only once
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            current_site = get_current_site(request)
+            domain = current_site.domain
+            subject = "REQUEST EMAIL TO RESET PASSWORD"
+            message = render_to_string('blog/reset_password_email.html', {
+                'domain' : domain,
+                'uid' : uid,
+                'token' : token
+            })
+
+            send_mail(subject, message, 'noreply@sri23.com', [email])
+            messages.success(request, 'Email has been sent ✅')
+
+    return render(request, "blog/forgot_password.html", {'form' : form})
+
+def reset_password(request):
+    pass

@@ -51,6 +51,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'myapp.middleware.RedirectAuthenticatedUserMiddleware',
+    'myapp.middleware.RestrictUnauthenticatedUserMiddleware',
 ]
 
 ROOT_URLCONF = 'myapp.urls'
@@ -146,3 +148,11 @@ LOGGING = {
         "level": "DEBUG",
     },
 }
+
+DEFAULT_FROM_EMIAL = 'your_email@sri23.com'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'addec935f4c6ea'
+EMAIL_HOST_PASSWORD = '041ccb7832095a'
