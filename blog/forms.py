@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from blog.models import Category, Post
 
 # Contact Form
 class ContactForm(forms.Form):
@@ -65,3 +66,33 @@ class ResetPasswordForm(forms.Form):
 
         if new_password and confirm_password and new_password != confirm_password:
             raise forms.ValidationError("New Password and Confirm password does not match ! 😭")
+        
+# Post Form
+class PostForm(forms.ModelForm):
+    title = forms.CharField(label = "Title", max_length = 100, required = True)
+    content = forms.CharField(label = "Content", required = True)
+    category = forms.ModelChoiceField(label = "Category", required = True, queryset=Category.objects.all())
+
+    class Meta:
+        model = Post
+        fields = ['title', 'content', 'category']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        title = cleaned_data.get('title')
+        content = cleaned_data.get('content')
+
+        if title and len(title) < 5:
+            raise forms.ValidationError('Title must be atleast 5 characters long... 🙈')
+        if content and len(content) < 10:
+            raise forms.ValidationError('Content must be atleast 10 characters long... 🙈')
+        
+    def save(self, commit = ...):
+        post_data = super().save(commit)
+
+        img_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/450px-No_image_available.svg.png"
+        post_data.img_url = img_url
+        
+        if commit:
+            post_data.save()
+        return post_data
