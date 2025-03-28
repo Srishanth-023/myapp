@@ -10,7 +10,7 @@ class Category(models. Model):
     name = models.CharField(max_length = 100)
 
     def __str__(self):
-        return self.title
+        return self.name
     
 # Post
 class Post(models.Model):
@@ -21,6 +21,7 @@ class Post(models.Model):
     slug = models.SlugField(unique = True)
     category = models.ForeignKey(Category, on_delete = models.CASCADE)
     user = models.ForeignKey(User, on_delete = models.CASCADE, null = True)
+    is_published = models.BooleanField(default = False)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title)
