@@ -181,7 +181,7 @@ def new_post(request):
     categories = Category.objects.all()
     form = PostForm()
     if request.method == 'POST':
-        form = PostForm(request.POST)
+        form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit = False)
             post.user = request.user
@@ -189,4 +189,3 @@ def new_post(request):
             return redirect('blog:dashboard')
             
     return render(request, "blog/new_post.html", {'categories' : categories, 'form' : form})
-    
