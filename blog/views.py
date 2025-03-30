@@ -14,7 +14,8 @@ from django.utils.encoding  import force_bytes
 from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.models import Group
 
 
 # Create your views here.
@@ -41,6 +42,9 @@ def index(request):
     return render(request, "blog/index.html", {'blog_title' : blog_title, 'page_obj' : page_obj})
 
 def detail(request, slug):
+    if request.user and not request.user.has_perm('blog.view_post'):
+        messages.error(request, 'You do not have permission to view any post 🙅‍♂️. Please contact the admin for further details.')
+        return redirect('blog:index')
     # Getting data from hard coded list 
     # post = next((item for item in posts if item['id'] == int(post_id)), None)
     try:
@@ -98,6 +102,9 @@ def register(request):
             user.set_password(form.cleaned_data['password'])
             user.save()
             # print("C'mon !")
+            # Adding user to default (Readers) group
+            readers_group, created = Group.objects.get_or_create(name = "Readers")
+            user.groups.add(readers_group)
             messages.success(request, "Registration successful, you're into our world !")
             return redirect("blog:login")
     return render(request, "blog/register.html", {'form' : form})
@@ -179,6 +186,7 @@ def reset_password(request, uidb64, token):
     return render(request, "blog/reset_password.html")
 
 @login_required
+@permission_required('blog.add_post', raise_exception = True)
 def new_post(request):
     categories = Category.objects.all()
     form = PostForm()
@@ -194,6 +202,7 @@ def new_post(request):
     return render(request, "blog/new_post.html", {'categories' : categories, 'form' : form})
 
 @login_required
+@permission_required('blog.change_post', raise_exception = True)
 def edit_post(request, post_id):
     categories = Category.objects.all()
     post = get_object_or_404(Post, id=post_id)
@@ -209,6 +218,7 @@ def edit_post(request, post_id):
     return render(request, "blog/edit_post.html", {'categories' : categories, 'post' : post, 'form' : form})
 
 @login_required
+@permission_required('blog.delete_post', raise_exception = True)
 def delete_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     post.delete()
@@ -216,6 +226,7 @@ def delete_post(request, post_id):
     return redirect('blog:dashboard')
 
 @login_required
+@permission_required('blog.publish_post', raise_exception = True)
 def publish_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     post.is_published = True
